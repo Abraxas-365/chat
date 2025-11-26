@@ -10,6 +10,10 @@ export interface Message {
 
 export interface UseChatOptions {
   initialMessages?: Message[];
+  apiUrl?: string;
+  authToken?: string | null;
+  userId?: string | null;
+  sessionId?: string | null;
   onSubmit?: (
     message: string,
     options: ChatOptions,
@@ -18,8 +22,11 @@ export interface UseChatOptions {
 }
 
 export interface ChatOptions {
-  mode: string;
-  source: string;
+  mode?: string;
+  source?: string;
+  userId?: string;
+  sessionId?: string;
+  agentName?: string;
 }
 
 export interface UseChatReturn {
@@ -39,6 +46,10 @@ function generateId(): string {
 
 export function useChat({
   initialMessages = [],
+  apiUrl,
+  authToken,
+  userId,
+  sessionId,
   onSubmit,
   onError,
 }: UseChatOptions = {}): UseChatReturn {
@@ -75,10 +86,44 @@ export function useChat({
 
         if (onSubmit) {
           response = await onSubmit(content.trim(), options);
+        } else if (apiUrl) {
+          // Call Python backend API
+          const headers: Record<string, string> = {
+            "Content-Type": "application/json",
+          };
+
+          // Add authorization header if token is available
+          if (authToken) {
+            headers["Authorization"] = `Bearer ${authToken}`;
+          }
+
+          const requestBody = {
+            prompt: content.trim(),
+            agent_name: options.agentName || "search_assistant",
+            user_id: options.userId || userId || "anonymous",
+            session_id: options.sessionId || sessionId || undefined,
+            mode: options.mode || "auto",
+            source: options.source || "all",
+          };
+
+          const apiResponse = await fetch(apiUrl, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(requestBody),
+          });
+
+          if (!apiResponse.ok) {
+            throw new Error(
+              `API error: ${apiResponse.status} ${apiResponse.statusText}`,
+            );
+          }
+
+          const data = await apiResponse.json();
+          response = data.response || data.message || "No response from server";
         } else {
           // Default mock response for demo purposes
           await new Promise((resolve) => setTimeout(resolve, 1000));
-          response = `This is a sample response to: "${content.trim()}"\n\n**Mode:** ${options.mode}\n**Source:** ${options.source}\n\n---\n\n## Features\n\n- Markdown support\n- Tables\n- Code blocks\n\n\`\`\`typescript\nconst greeting = "Hello, World!";\nconsole.log(greeting);\n\`\`\`\n\n| Feature | Status |\n|---------|--------|\n| Tables | Supported |\n| Lists | Supported |\n| Code | Supported |`;
+          response = `This is a sample response to: "${content.trim()}"\n\n**Mode:** ${options.mode || "auto"}\n**Source:** ${options.source || "all"}\n\n---\n\n## Features\n\n- Markdown support\n- Tables\n- Code blocks\n\n\`\`\`typescript\nconst greeting = "Hello, World!";\nconsole.log(greeting);\n\`\`\`\n\n| Feature | Status |\n|---------|--------|\n| Tables | Supported |\n| Lists | Supported |\n| Code | Supported |`;
         }
 
         setMessages((prev) =>
@@ -101,7 +146,7 @@ export function useChat({
         setIsLoading(false);
       }
     },
-    [isLoading, onSubmit, onError],
+    [isLoading, apiUrl, authToken, userId, sessionId, onSubmit, onError],
   );
 
   const clearMessages = React.useCallback(() => {

@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Teams app package
+teams-manifest/app-package.zip
+teams-manifest/*.png

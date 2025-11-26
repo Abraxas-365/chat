@@ -1,0 +1,64 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.23/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.23",
+  "version": "1.0.0",
+  "id": "YOUR-APP-ID-GUID",
+  "packageName": "com.yourcompany.aiassistant",
+  "developer": {
+    "name": "Your Company Name",
+    "websiteUrl": "https://yourcompany.com",
+    "privacyUrl": "https://yourcompany.com/privacy",
+    "termsOfUseUrl": "https://yourcompany.com/terms"
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "name": {
+    "short": "AI Assistant",
+    "full": "AI Assistant - Document Search and Q&A"
+  },
+  "description": {
+    "short": "AI-powered document search and question answering assistant",
+    "full": "An intelligent assistant that helps you search through documents, answer questions, and find information quickly using advanced AI technology."
+  },
+  "accentColor": "#6264A7",
+  "staticTabs": [
+    {
+      "entityId": "ai-assistant-personal-tab",
+      "name": "Assistant",
+      "contentUrl": "https://your-react-app-url.com?inTeams=true&theme={app.theme}&locale={app.locale}",
+      "websiteUrl": "https://your-react-app-url.com",
+      "scopes": ["personal"]
+    }
+  ],
+  "configurableTabs": [
+    {
+      "configurationUrl": "https://your-react-app-url.com/config?theme={app.theme}",
+      "canUpdateConfiguration": true,
+      "scopes": ["team", "groupchat"],
+      "context": [
+        "channelTab",
+        "privateChatTab",
+        "meetingChatTab"
+      ]
+    }
+  ],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": [
+    "your-react-app-url.com",
+    "your-backend.run.app",
+    "token.botframework.com"
+  ],
+  "webApplicationInfo": {
+    "id": "YOUR-AZURE-AD-APP-ID",
+    "resource": "api://your-react-app-url.com/YOUR-AZURE-AD-APP-ID"
+  },
+  "backgroundLoadConfiguration": {
+    "supportedAppIds": ["YOUR-APP-ID-GUID"],
+    "enableBackgroundLoad": true
+  }
+}
